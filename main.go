@@ -6,11 +6,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/ptgms/knowledgeshot/helpers"
 	"html/template"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var version = "0.1"
+var niceStrings = []string{"I hope you're having an nice day!", "We don't track you - it's your right!", "We are grateful for your visit!"}
 
 func homePage(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/home.html")
@@ -22,7 +26,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files, errF := helpers.FileCount("pages/")
-	println(files)
 	if errF != nil {
 		println("Error while trying to retrieve indexed!")
 		println(errF.Error())
@@ -41,13 +44,16 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println("Endpoint Hit: " + r.RequestURI)
 }
 
+var limiter = helpers.NewIPRateLimiter(1, 5)
+
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homePage)
 	router.HandleFunc("/page/{term}", getPage)
+	router.HandleFunc("/random", randomPage)
 	server := http.Server{
 		Addr:    ":80",
-		Handler: router,
+		Handler: limitMiddleware(router),
 		TLSConfig: &tls.Config{
 			NextProtos: []string{"h2", "http/1.1"},
 		},
@@ -57,6 +63,31 @@ func handleRequests() {
 	if err := /*server.ListenAndServeTLS("certs/cert.pem", "certs/privkey.pem");*/ server.ListenAndServe(); err != nil {
 		fmt.Println(err)
 	}
+}
+
+func limitMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		limiter := limiter.GetLimiter(r.RemoteAddr)
+		if !limiter.Allow() {
+			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func randomPage(w http.ResponseWriter, r *http.Request) {
+	files, err := ioutil.ReadDir("pages/")
+	if err != nil {
+		println("Error while trying to retrieve indexed!")
+		println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "An internal server error occured! It has been logged!")
+		return
+	}
+	http.Redirect(w, r, "page/"+strings.ReplaceAll(files[rand.Intn(len(files))].Name(), ".json", ""), http.StatusSeeOther)
+
 }
 
 func getPage(w http.ResponseWriter, r *http.Request) {
@@ -85,28 +116,28 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		files, errF := helpers.FileCount("pages/")
-		println(files)
-		if errF != nil {
-			println("Error while trying to retrieve indexed!")
-			println(errF.Error())
-			return
+		imageToDraw := response.Image
+
+		if imageToDraw == "nil" || imageToDraw == "" {
+			imageToDraw = "https://i.ibb.co/cgRJ97N/unknown.png"
 		}
 
 		items := struct {
-			TitleHead string
-			Title     string
-			Img       string
-			Content   string
-			Sources   string
-			Version   string
+			TitleHead  string
+			Title      string
+			Img        string
+			Content    string
+			Sources    []string
+			Version    string
+			NiceString string
 		}{
-			TitleHead: response.Title,
-			Title:     response.Title,
-			Img:       response.Image,
-			Content:   response.Text,
-			Sources:   links,
-			Version:   version,
+			TitleHead:  response.Title,
+			Title:      response.Title,
+			Img:        imageToDraw,
+			Content:    response.Text,
+			Sources:    response.Links,
+			Version:    version,
+			NiceString: niceStrings[rand.Intn(len(niceStrings))],
 		}
 		_ = t.Execute(w, items)
 
@@ -116,9 +147,9 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	println("Khinsider-Ripper API has started!\nPress CTRL+C to end.")
-	testLinks := []string{"test1", "test2"}
-	helpers.MakePage("Test", "Test", "Test", testLinks)
+	println(fmt.Sprintf("Knowledgeshot %s has started!\nPress CTRL+C to end.", version))
+	//testLinks := []string{"test1", "test2"}
+	//helpers.MakePage("Test", "Test", "Test", testLinks)
 
 	handleRequests()
 }

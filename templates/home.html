@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <style>
         :root {
             --color-bg: linear-gradient(90deg, rgba(8,0,138,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
@@ -47,12 +48,23 @@
             color: var(--font-color);
             font-family: Arial, Helvetica, sans-serif;
         }
+
+        .link
+        {
+            color:white;
+            text-decoration: none;
+        }
     </style>
 </head>
 
 <body>
     <div class="container centered">
         <div class="header center a" id="hello">Welcome to KnowledgeShot.<br>There are a total of {{ .Indexed }} articles indexed.</div>
+        <a href="/random">
+            <div class="link">
+                <h2>Load an random article</h2>
+            </div>
+        </a>
     </div>
 
     <footer class="container bottom">

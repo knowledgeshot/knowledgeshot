@@ -2,9 +2,11 @@ package helpers
 
 import (
 	"encoding/json"
+	"golang.org/x/time/rate"
 	"io/ioutil"
 	"net/url"
 	"os"
+	"sync"
 )
 
 type pageData struct {
@@ -16,7 +18,6 @@ type pageData struct {
 
 func GetPage(term string) pageData {
 	path := "pages/" + term + ".json"
-	println(path)
 	if FileExists(path) {
 		jsonFile, err := os.Open(path)
 
@@ -60,4 +61,53 @@ func MakePage(title string, text string, image string, links []string) {
 	file, _ := json.MarshalIndent(page, "", " ")
 
 	_ = ioutil.WriteFile("pages/"+url.QueryEscape(title)+".json", file, 0644)
+}
+
+// IPRateLimiter .
+type IPRateLimiter struct {
+	ips map[string]*rate.Limiter
+	mu  *sync.RWMutex
+	r   rate.Limit
+	b   int
+}
+
+// NewIPRateLimiter .
+func NewIPRateLimiter(r rate.Limit, b int) *IPRateLimiter {
+	i := &IPRateLimiter{
+		ips: make(map[string]*rate.Limiter),
+		mu:  &sync.RWMutex{},
+		r:   r,
+		b:   b,
+	}
+
+	return i
+}
+
+// AddIP creates a new rate limiter and adds it to the ips map,
+// using the IP address as the key
+func (i *IPRateLimiter) AddIP(ip string) *rate.Limiter {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+
+	limiter := rate.NewLimiter(i.r, i.b)
+
+	i.ips[ip] = limiter
+
+	return limiter
+}
+
+// GetLimiter returns the rate limiter for the provided IP address if it exists.
+// Otherwise calls AddIP to add IP address to the map
+func (i *IPRateLimiter) GetLimiter(ip string) *rate.Limiter {
+	i.mu.Lock()
+	limiter, exists := i.ips[ip]
+
+	if !exists {
+		i.mu.Unlock()
+		return i.AddIP(ip)
+	}
+
+	i.mu.Unlock()
+
+	return limiter
 }
