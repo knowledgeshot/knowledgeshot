@@ -1,0 +1,63 @@
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <style>
+        :root {
+            --color-bg: linear-gradient(90deg, rgba(8,0,138,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+            --font-color: white;
+        }
+
+        .icon-block {
+            padding: 0 15px;
+        }
+
+        .icon-block .material-icons {
+            font-size: inherit;
+        }
+
+        .container.centered {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        .container.bottom {
+            position: absolute;
+            left: 50%;
+            top: 90%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        div.a {
+            font-size: 300%;
+            font-family: Arial, serif;
+        }
+
+        .disable-select {
+            user-select: none;
+        }
+
+        body {
+            background: var(--color-bg);
+            color: var(--font-color);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container centered">
+        <div class="header center a" id="hello">Welcome to KnowledgeShot.<br>There are a total of {{ .Indexed }} articles indexed.</div>
+    </div>
+
+    <footer class="container bottom">
+        <a>We don't track anything, there is no Javascript attached to any site. We just wanna share knowledge with you :)</a>
+    </footer>
+</body>
+
+</html>
