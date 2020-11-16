@@ -13,6 +13,7 @@ import (
 	"strings"
 )
 
+// Search result struct re-defined here so we can directly access it later
 type searchResult struct {
 	SearchResult string `json:"Title"`
 	LinkContent  string `json:"text"`
@@ -20,11 +21,13 @@ type searchResult struct {
 	WrittenDate  string `json:"writtendate"`
 }
 
+// Bump this on updates please :)
 var version = "0.1"
+
+// Currently kind of unused, maybe later i will add them somewhere
 var niceStrings = []string{"I hope you're having an nice day!", "We don't track you - it's your right!", "We are grateful for your visit!"}
 
-var searchTemplate = "<div class=\"media-body pb-3 mb-0 small lh-125 border-bottom border-gray\">\n                <div class=\"d-flex justify-content-between align-items-center w-100\">\n                    <strong class=\"text-gray-dark\">{{ .SearchResult }}</strong>\n                    <a href=\"{{ .LinkContent }}\">View</a>\n                </div>\n                <span class=\"d-block\">Written by {{ .AuthorName }} on {{ .WrittenDate }}.</span>\n            </div>"
-
+// Home page serve
 func homePage(w http.ResponseWriter, _ *http.Request) {
 	t, err := template.ParseFiles("templates/home.html")
 
@@ -34,10 +37,18 @@ func homePage(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
+	// Let us get all jsons in pages to show how many sites we hold!
 	files, errF := helpers.FileCount("pages/")
 	if errF != nil {
 		println("Error while trying to retrieve indexed!")
 		println(errF.Error())
+
+		items := struct {
+			Indexed string
+		}{
+			Indexed: "ERROR",
+		}
+		_ = t.Execute(w, items)
 		return
 	}
 
@@ -53,8 +64,10 @@ func homePage(w http.ResponseWriter, _ *http.Request) {
 	//fmt.Println("Endpoint Hit: " + r.RequestURI)
 }
 
+// Rate limit so servers wont get overwhelmed.
 var limiter = helpers.NewIPRateLimiter(1, 5)
 
+// Hell.
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homePage)
@@ -91,7 +104,8 @@ func limitMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func searchBlank(w http.ResponseWriter, r *http.Request) {
+// Serve blank page with no real function other than searching, which is handled by JS. We do insert our version though.
+func searchBlank(w http.ResponseWriter, _ *http.Request) {
 	t, err := template.ParseFiles("templates/searchblank.html")
 
 	if err != nil {
@@ -108,7 +122,8 @@ func searchBlank(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func allArts(w http.ResponseWriter, r *http.Request) {
+// Display all articles in one place, baby! (same structure as search just with all articles.)
+func allArts(w http.ResponseWriter, _ *http.Request) {
 	t, err := template.ParseFiles("templates/allresults.html")
 
 	if err != nil {
@@ -148,9 +163,9 @@ func allArts(w http.ResponseWriter, r *http.Request) {
 func searchFor(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	key := vars["search"]
+	key := vars["search"] // get our search key defined in the handler.
 
-	searchresults := helpers.ReturnSearch(key)
+	searchresults := helpers.ReturnSearch(key) // let us fetch the results from our helper
 	//println(strconv.Itoa(len(searchresults)))
 
 	t, err := template.ParseFiles("templates/search.html")
@@ -163,7 +178,7 @@ func searchFor(w http.ResponseWriter, r *http.Request) {
 
 	var searchParsed []searchResult
 
-	for i := range searchresults {
+	for i := range searchresults { // convert helper searchresult to main searchresult (hacky pls so fix)
 		searchParsed = append(searchParsed, searchResult{
 			SearchResult: searchresults[i].Title,
 			LinkContent:  searchresults[i].Path,
@@ -188,6 +203,7 @@ func searchFor(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/* BOOTSTRAP RETURNERS */
 func bootstrap(w http.ResponseWriter, _ *http.Request) {
 	file, err := ioutil.ReadFile("resources-html/bootstrap.min.css")
 	if err != nil {
@@ -210,6 +226,9 @@ func bootstrap4(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write(file)
 }
 
+/* --- DONE --- */
+
+// We load an random page by selecting an random file from /pages. might make this use searchindex soon.
 func randomPage(w http.ResponseWriter, r *http.Request) {
 	files, err := ioutil.ReadDir("pages/")
 	if err != nil {
