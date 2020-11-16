@@ -16,34 +16,10 @@
             padding-top: 56px;
         }
 
-        @media (max-width: 991.98px) {
-            .offcanvas-collapse {
-                position: fixed;
-                top: 56px; /* Height of navbar */
-                bottom: 0;
-                left: 100%;
-                width: 100%;
-                padding-right: 1rem;
-                padding-left: 1rem;
-                overflow-y: auto;
-                visibility: hidden;
-                background-color: #343a40;
-                transition-timing-function: ease-in-out;
-                transition-duration: .3s;
-                transition-property: left, visibility;
+        @media (max-width: 990px) {
+            .container {
+                padding-top: 60px;
             }
-
-            .offcanvas-collapse.open {
-                left: 0;
-                visibility: visible;
-            }
-        }
-
-        .nav-scroller {
-            position: relative;
-            z-index: 2;
-            height: 2.75rem;
-            overflow-y: hidden;
         }
 
         .nav-scroller .nav {
@@ -99,17 +75,11 @@
         .lh-125 {
             line-height: 1.25;
         }
-
-        .lh-150 {
-            line-height: 1.5;
-        }</style>
+    </style>
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
     <a class="navbar-brand mr-auto mr-lg-0"></a>
-    <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas">
-        <span class="navbar-toggler-icon"></span>
-    </button>
     <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
