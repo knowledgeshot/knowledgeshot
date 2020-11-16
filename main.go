@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os/user"
 	"strconv"
 	"strings"
 )
@@ -22,10 +23,12 @@ type searchResult struct {
 }
 
 // Bump this on updates please :)
-var version = "0.1"
+var version = "0.5"
 
 // Currently kind of unused, maybe later i will add them somewhere
 var niceStrings = []string{"I hope you're having an nice day!", "We don't track you - it's your right!", "We are grateful for your visit!"}
+
+var username string
 
 // Home page serve
 func homePage(w http.ResponseWriter, _ *http.Request) {
@@ -44,18 +47,26 @@ func homePage(w http.ResponseWriter, _ *http.Request) {
 		println(errF.Error())
 
 		items := struct {
-			Indexed string
+			Indexed  string
+			HostName string
+			Version  string
 		}{
-			Indexed: "ERROR",
+			Indexed:  "ERROR",
+			HostName: username,
+			Version:  version,
 		}
 		_ = t.Execute(w, items)
 		return
 	}
 
 	items := struct {
-		Indexed string
+		Indexed  string
+		HostName string
+		Version  string
 	}{
-		Indexed: strconv.Itoa(files),
+		Indexed:  strconv.Itoa(files),
+		HostName: username,
+		Version:  version,
 	}
 	_ = t.Execute(w, items)
 
@@ -303,8 +314,15 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	userD, err := user.Current()
+	if err != nil {
+		username = "NULL"
+	} else {
+		username = userD.Name
+	}
+
 	//println(helpers.MarkDownReady("# test\n## test2"))
-	println(fmt.Sprintf("Knowledgeshot %s has started!\nPress CTRL+C to end.", version))
+	println(fmt.Sprintf("Knowledgeshot %s has started with user %s!\nPress CTRL+C to end.", version, username))
 	//helpers.MakePage("MarkdownTest", "# This is a test for markdown support inside KnowledgeShot\n## It is very experimental!\n- Lists do be\n- working doe!\nAnd [links](pog.com) too, of course.\n\nCode line: `code bro`", [4]string{"ptgms Industries", "nil", "nil", "nil"} ,[]string{}, []string{})
 	helpers.IndexSearch()
 	handleRequests()

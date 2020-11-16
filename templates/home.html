@@ -1,75 +1,69 @@
-<html lang="de">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Home</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Welcome to Knowledgeshot, the primary place to get your facts and information about topics as TL;DR as possible.">
+    <meta name="author" content="ptgms Industries">
+    <meta name="keywords" content="infos facts tldr">
+    <title>Welcome to KnowledgeShot.</title>
+    <link href="/res/bootstrap4.css" rel="stylesheet">
     <style>
-        :root {
-            --color-bg: linear-gradient(90deg, rgba(8,0,138,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
-            --font-color: white;
-        }
-
-        .icon-block {
-            padding: 0 15px;
-        }
-
-        .icon-block .material-icons {
-            font-size: inherit;
-        }
-
-        .container.centered {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            -webkit-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
-        }
-
-        .container.bottom {
-            position: absolute;
-            left: 50%;
-            top: 90%;
-            -webkit-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
-        }
-
-        div.a {
-            font-size: 300%;
-            font-family: Arial, serif;
-        }
-
-        .disable-select {
-            user-select: none;
-        }
-
         body {
-            background: var(--color-bg);
-            color: var(--font-color);
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        .link
-        {
-            color:white;
-            text-decoration: none;
+            padding-top: 3.5rem;
         }
     </style>
 </head>
-
 <body>
-    <div class="container centered">
-        <div class="header center a" id="hello">Welcome to KnowledgeShot.<br>There are a total of {{ .Indexed }} articles indexed.</div>
-        <a href="/random">
-            <div class="link">
-                <h2>Load an random article</h2>
-            </div>
-        </a>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/random">Random Page&nbsp;<span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://github.com/ptgms/knowledgeshot/issues/new">Report an issue&nbsp;<span class="sr-only"></span></a>
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
     </div>
-
-    <footer class="container bottom">
-        <a>We don't track anything, there is no Javascript attached to any site. We just wanna share knowledge with you :)</a>
+</nav>
+<div class="jumbotron">
+    <div class="container">
+        <h1 class="display-3">Welcome!</h1>
+        <p>KnowledgeShot is an simple and easy to use site bringing you quick information to consume fast. We TL;DR things without oversimplifying stuff, in order to bring you good and healthy bite-sized articles to consume! We currently hold <b>{{ .Indexed }}</b> articles!</p>
+        <p><a class="btn btn-primary btn-lg" href="/all" role="button">See all articles &raquo;</a></p>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Contribute Articles</h2>
+            <p>We&apos;ve made it easy for you to contribute articles. Please take a look at our designated page containing all sorts of information about article submissions!</p>
+            <p><a class="btn btn-secondary" href="https://github.com/ptgms/knowledgeshot/blob/master/README.MD" role="button">View page &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Contribute Code</h2>
+            <p>Our service is primarily ran on Go, however, we can also use some people that have experience in HTML! Go take a look at our GitHub now and see if it&apos;s your cup of tea!</p>
+            <p><a class="btn btn-secondary" href="https://github.com/ptgms/knowledgeshot" role="button">View GitHub &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Run this yourself</h2>
+            <p>It is very easy to run an copy of KnowledgeShot yourself. Go ahead and take a look at our designated page for running KnowledgeShot locally/on another server!</p>
+            <p><a class="btn btn-secondary" href="https://github.com/ptgms/knowledgeshot/blob/master/README.MD" role="button">View Page &raquo;</a></p>
+        </div>
+    </div>
+    <hr>
+    <footer>
+        <p>Made by <a href="https://github.com/ptgms">ptgms Industries</a> and hosted by {{ .HostName }} running <a href="https://github.com/ptgms">KnowledgeShot</a> Version {{ .Version }}</p>
     </footer>
+</div>
 </body>
-
 </html>
