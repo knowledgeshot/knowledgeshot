@@ -1,7 +1,13 @@
 {
   "Title": "C#",
   "text": "C# or CSharp is a bad programming language that makes you want to throw your PC out. It is a budget/diet coke version of Java. Microsoft owns C# which makes it even worse. Don't use it.",
-  "image": "https://media.discordapp.net/attachments/541679612640493588/777625283033432086/unknown.png",
+  "image": ["https://media.discordapp.net/attachments/541679612640493588/777625283033432086/unknown.png"],
+  "author": [
+    "ptgms Industries",
+    "https://avatars2.githubusercontent.com/u/62300763?s=460&v=4",
+    "12. November 2020",
+    "https://github.com/ptgms"
+  ],
   "links": [
     "Discord user \"Russ_the_b\""
   ]

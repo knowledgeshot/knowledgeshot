@@ -10,10 +10,11 @@ import (
 )
 
 type pageData struct {
-	Title string   `json:"Title"`
-	Text  string   `json:"text"`
-	Image string   `json:"image"`
-	Links []string `json:"links"`
+	Title  string    `json:"Title"`
+	Text   string    `json:"text"`
+	Author [4]string `json:"author"`
+	Image  []string  `json:"image"`
+	Links  []string  `json:"links"`
 }
 
 func GetPage(term string) pageData {
@@ -25,7 +26,7 @@ func GetPage(term string) pageData {
 			return pageData{
 				Title: "500ERROR",
 				Text:  err.Error(),
-				Image: "",
+				Image: nil,
 				Links: nil,
 			}
 		}
@@ -45,13 +46,13 @@ func GetPage(term string) pageData {
 		return pageData{
 			Title: "404ERROR",
 			Text:  "",
-			Image: "",
+			Image: nil,
 			Links: nil,
 		}
 	}
 }
 
-func MakePage(title string, text string, image string, links []string) {
+func MakePage(title string, text string, image []string, links []string) {
 	page := pageData{
 		Title: title,
 		Text:  text,

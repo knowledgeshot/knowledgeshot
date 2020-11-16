@@ -13,10 +13,19 @@ import (
 	"strings"
 )
 
+type searchResult struct {
+	SearchResult string `json:"Title"`
+	LinkContent  string `json:"text"`
+	AuthorName   string `json:"authorname"`
+	WrittenDate  string `json:"writtendate"`
+}
+
 var version = "0.1"
 var niceStrings = []string{"I hope you're having an nice day!", "We don't track you - it's your right!", "We are grateful for your visit!"}
 
-func homePage(w http.ResponseWriter, r *http.Request) {
+var searchTemplate = "<div class=\"media-body pb-3 mb-0 small lh-125 border-bottom border-gray\">\n                <div class=\"d-flex justify-content-between align-items-center w-100\">\n                    <strong class=\"text-gray-dark\">{{ .SearchResult }}</strong>\n                    <a href=\"{{ .LinkContent }}\">View</a>\n                </div>\n                <span class=\"d-block\">Written by {{ .AuthorName }} on {{ .WrittenDate }}.</span>\n            </div>"
+
+func homePage(w http.ResponseWriter, _ *http.Request) {
 	t, err := template.ParseFiles("templates/home.html")
 
 	if err != nil {
@@ -51,6 +60,11 @@ func handleRequests() {
 	router.HandleFunc("/", homePage)
 	router.HandleFunc("/page/{term}", getPage)
 	router.HandleFunc("/random", randomPage)
+	router.HandleFunc("/res/bootstrap.css", bootstrap)
+	router.HandleFunc("/search/{search}", searchFor)
+	router.HandleFunc("/res/bootstrap4.css", bootstrap4)
+	router.HandleFunc("/all", allArts)
+	router.HandleFunc("/search", searchBlank)
 	server := http.Server{
 		Addr:    ":80",
 		Handler: limitMiddleware(router),
@@ -77,13 +91,132 @@ func limitMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func searchBlank(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("templates/searchblank.html")
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	items := struct {
+		Version string
+	}{
+		Version: version,
+	}
+	_ = t.Execute(w, items)
+
+}
+
+func allArts(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("templates/allresults.html")
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	allResults := helpers.ReturnAll()
+
+	var articlesParsed []searchResult
+
+	for i := range allResults {
+		articlesParsed = append(articlesParsed, searchResult{
+			SearchResult: allResults[i].Title,
+			LinkContent:  allResults[i].Path,
+			AuthorName:   allResults[i].Author[0],
+			WrittenDate:  allResults[i].Author[2],
+		})
+	}
+
+	items := struct {
+		Count         string
+		SearchResults []searchResult
+	}{
+		Count:         strconv.Itoa(len(articlesParsed)),
+		SearchResults: articlesParsed,
+	}
+
+	errEx := t.Execute(w, items)
+	if errEx != nil {
+		println(errEx.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+}
+
+func searchFor(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	key := vars["search"]
+
+	searchresults := helpers.ReturnSearch(key)
+	//println(strconv.Itoa(len(searchresults)))
+
+	t, err := template.ParseFiles("templates/search.html")
+
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var searchParsed []searchResult
+
+	for i := range searchresults {
+		searchParsed = append(searchParsed, searchResult{
+			SearchResult: searchresults[i].Title,
+			LinkContent:  searchresults[i].Path,
+			AuthorName:   searchresults[i].Author[0],
+			WrittenDate:  searchresults[i].Author[2],
+		})
+	}
+
+	items := struct {
+		SearchText    string
+		Count         string
+		SearchResults []searchResult
+	}{
+		SearchText:    key,
+		Count:         strconv.Itoa(len(searchresults)),
+		SearchResults: searchParsed,
+	}
+
+	errEx := t.Execute(w, items)
+	if errEx != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func bootstrap(w http.ResponseWriter, _ *http.Request) {
+	file, err := ioutil.ReadFile("resources-html/bootstrap.min.css")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "500 internal server error\n"+err.Error())
+		return
+	}
+	w.Header().Add("Content-Type", "text/css")
+	_, _ = w.Write(file)
+}
+
+func bootstrap4(w http.ResponseWriter, _ *http.Request) {
+	file, err := ioutil.ReadFile("resources-html/bootstrap4.css")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "500 internal server error\n"+err.Error())
+		return
+	}
+	w.Header().Add("Content-Type", "text/css")
+	_, _ = w.Write(file)
+}
+
 func randomPage(w http.ResponseWriter, r *http.Request) {
 	files, err := ioutil.ReadDir("pages/")
 	if err != nil {
 		println("Error while trying to retrieve indexed!")
 		println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "An internal server error occured! It has been logged!")
+		_, _ = fmt.Fprintf(w, "An internal server error occured! It has been logged!")
 		return
 	}
 	http.Redirect(w, r, "page/"+strings.ReplaceAll(files[rand.Intn(len(files))].Name(), ".json", ""), http.StatusSeeOther)
@@ -101,7 +234,7 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprintf(w, "404 - Article not found!")
 	} else if response.Title == "500ERROR" {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "500 - Server error!\n"+response.Text)
+		_, _ = fmt.Fprintf(w, "500 - Internal Server error!\n"+response.Text)
 	} else {
 		var links string
 		for link := range response.Links {
@@ -116,40 +249,43 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		imageToDraw := response.Image
-
-		if imageToDraw == "nil" || imageToDraw == "" {
-			imageToDraw = "https://i.ibb.co/cgRJ97N/unknown.png"
-		}
-
 		items := struct {
-			TitleHead  string
-			Title      string
-			Img        string
-			Content    string
-			Sources    []string
-			Version    string
-			NiceString string
+			TitleHead   string
+			Title       string
+			Img         []string
+			AuthorName  string
+			AuthorImage string
+			AuthorLink  string
+			Written     string
+			Content     string
+			Sources     []string
+			Version     string
+			NiceString  string
 		}{
-			TitleHead:  response.Title,
-			Title:      response.Title,
-			Img:        imageToDraw,
-			Content:    response.Text,
-			Sources:    response.Links,
-			Version:    version,
-			NiceString: niceStrings[rand.Intn(len(niceStrings))],
+			TitleHead:   response.Title,
+			Title:       response.Title,
+			Img:         response.Image,
+			AuthorName:  response.Author[0],
+			AuthorImage: response.Author[1],
+			Written:     response.Author[2],
+			AuthorLink:  response.Author[3],
+			Content:     response.Text,
+			Sources:     response.Links,
+			Version:     version,
+			NiceString:  niceStrings[rand.Intn(len(niceStrings))],
 		}
-		_ = t.Execute(w, items)
 
-		//_, _ = fmt.Fprintf(w, response.Title+"\n\n"+response.Text+"\n\nImages:\n"+response.Image+"\n\nSources:\n"+links)
+		errEx := t.Execute(w, items)
+		if errEx != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 
 }
 
 func main() {
 	println(fmt.Sprintf("Knowledgeshot %s has started!\nPress CTRL+C to end.", version))
-	//testLinks := []string{"test1", "test2"}
-	//helpers.MakePage("Test", "Test", "Test", testLinks)
-
+	//helpers.MakePage("Test", "Test", "Test", []string{"test1", "test2"})
+	helpers.IndexSearch()
 	handleRequests()
 }
