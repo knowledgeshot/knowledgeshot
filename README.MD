@@ -10,5 +10,5 @@ To add features or fix bugs, check out the code and also make a Pull Request!
 ### ToDos
 
 - Add multi-image support
-- Add author details (should be easy enough)
+- ~~Add author details (should be easy enough)~~
 - Redesign home screen with actual stats/info/help
