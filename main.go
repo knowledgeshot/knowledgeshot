@@ -79,7 +79,7 @@ func handleRequests() {
 	router.HandleFunc("/all", allArts)
 	router.HandleFunc("/search", searchBlank)
 	server := http.Server{
-		Addr:    ":80",
+		Addr:    ":8081",
 		Handler: limitMiddleware(router),
 		TLSConfig: &tls.Config{
 			NextProtos: []string{"h2", "http/1.1"},
@@ -276,7 +276,7 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 			AuthorImage string
 			AuthorLink  string
 			Written     string
-			Content     string
+			Content     template.HTML
 			Sources     []string
 			Version     string
 			NiceString  string
@@ -288,7 +288,7 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 			AuthorImage: response.Author[1],
 			Written:     response.Author[2],
 			AuthorLink:  response.Author[3],
-			Content:     response.Text,
+			Content:     helpers.MarkDownReady(response.Text),
 			Sources:     response.Links,
 			Version:     version,
 			NiceString:  niceStrings[rand.Intn(len(niceStrings))],
@@ -303,8 +303,9 @@ func getPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	//println(helpers.MarkDownReady("# test\n## test2"))
 	println(fmt.Sprintf("Knowledgeshot %s has started!\nPress CTRL+C to end.", version))
-	//helpers.MakePage("Test", "Test", "Test", []string{"test1", "test2"})
+	//helpers.MakePage("MarkdownTest", "# This is a test for markdown support inside KnowledgeShot\n## It is very experimental!\n- Lists do be\n- working doe!\nAnd [links](pog.com) too, of course.\n\nCode line: `code bro`", [4]string{"ptgms Industries", "nil", "nil", "nil"} ,[]string{}, []string{})
 	helpers.IndexSearch()
 	handleRequests()
 }

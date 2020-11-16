@@ -1,8 +1,11 @@
 package helpers
 
 import (
+	"bytes"
 	"encoding/json"
+	"github.com/yuin/goldmark"
 	"golang.org/x/time/rate"
+	"html/template"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -52,16 +55,29 @@ func GetPage(term string) pageData {
 	}
 }
 
-func MakePage(title string, text string, image []string, links []string) {
+func MakePage(title string, text string, author [4]string, image []string, links []string) {
 	page := pageData{
-		Title: title,
-		Text:  text,
-		Image: image,
-		Links: links,
+		Title:  title,
+		Text:   text,
+		Author: author,
+		Image:  image,
+		Links:  links,
 	}
 	file, _ := json.MarshalIndent(page, "", " ")
 
 	_ = ioutil.WriteFile("pages/"+url.QueryEscape(title)+".json", file, 0644)
+}
+
+func MarkDownReady(text string) template.HTML {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(text), &buf); err != nil {
+		panic(err)
+	}
+	finalTemp := template.HTML(buf.String())
+
+	println(finalTemp)
+
+	return finalTemp
 }
 
 // IPRateLimiter .
