@@ -74,9 +74,6 @@ func MarkDownReady(text string) template.HTML {
 		panic(err)
 	}
 	finalTemp := template.HTML(buf.String())
-
-	println(finalTemp)
-
 	return finalTemp
 }
 
