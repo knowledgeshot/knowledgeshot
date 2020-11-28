@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/ptgms/knowledgeshot/helpers"
@@ -20,6 +21,11 @@ type searchResult struct {
 	LinkContent  string `json:"text"`
 	AuthorName   string `json:"authorname"`
 	WrittenDate  string `json:"writtendate"`
+}
+
+type randomPageStruct struct {
+	Link  string `json:"link"`
+	Title string `json:"title"`
 }
 
 // Bump this on updates please :)
@@ -89,6 +95,12 @@ func handleRequests() {
 	router.HandleFunc("/res/bootstrap4.css", bootstrap4)
 	router.HandleFunc("/all", allArts)
 	router.HandleFunc("/search", searchBlank)
+
+	// API FUNCTIONS
+	router.HandleFunc("/api/search/{term}", apiSearch)
+	router.HandleFunc("/api/page/{term}", apiDisplay)
+	router.HandleFunc("/api/random", apiRandom)
+
 	server := http.Server{
 		Addr:    ":8081",
 		Handler: limitMiddleware(router),
@@ -169,6 +181,61 @@ func allArts(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
+}
+
+func apiSearch(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if !helpers.Validate_key(r.Header.Get("API-Key")) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	key := vars["term"] // get our search key defined in the handler.
+
+	searchresults := helpers.ReturnSearch(key) // let us fetch the results from our helper
+
+	_ = json.NewEncoder(w).Encode(searchresults) // return our struct array as json
+}
+
+func apiRandom(w http.ResponseWriter, r *http.Request) {
+	if !helpers.Validate_key(r.Header.Get("API-Key")) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	files, err := ioutil.ReadDir("pages/")
+	if err != nil {
+		println("Error while trying to retrieve indexed!")
+		println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "An internal server error occured! It has been logged!")
+		return
+	}
+	_ = json.NewEncoder(w).Encode(randomPageStruct{
+		Link:  strings.ReplaceAll(files[rand.Intn(len(files))].Name(), ".json", ""),
+		Title: files[rand.Intn(len(files))].Name(),
+	})
+}
+
+func apiDisplay(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if !helpers.Validate_key(r.Header.Get("API-Key")) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	key := vars["term"]
+	response := helpers.GetPage(key)
+
+	if response.Title == "404ERROR" {
+		w.WriteHeader(http.StatusNotFound)
+		//_, _ = fmt.Fprintf(w, "404 - Article not found!")
+	} else if response.Title == "500ERROR" {
+		w.WriteHeader(http.StatusInternalServerError)
+		//_, _ = fmt.Fprintf(w, "500 - Internal Server error!\n"+response.Text)
+	} else {
+		_ = json.NewEncoder(w).Encode(response) // return our struct array as json
+	}
 }
 
 func searchFor(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,13 @@
+{
+  "homescreen": {
+    "welcome": "Welcome!",
+    "welcome_detail": "KnowledgeShot is an simple and easy to use site bringing you quick information to consume fast. We TL;DR things without oversimplifying stuff, in order to bring you good and healthy bite-sized articles to consume! We currently hold %s articles!",
+    "see_all": "See all articles »",
+    "contribute_art": "Contribute Articles",
+    "contribute_art_det": "We've made it easy for you to contribute articles. Please take a look at our designated page containing all sorts of information about article submissions!",
+    "contribute_code": "Contribute Code",
+    "contribute_code_det": "Our service is primarily ran on Go, however, we can also use some people that have experience in HTML! Go take a look at our GitHub now and see if it's your cup of tea!",
+    "run_yourself": "Run this yourself",
+    "run_yourself_det": "It is very easy to run an copy of KnowledgeShot yourself. Go ahead and take a look at our designated page for running KnowledgeShot locally/on another server!"
+  }
+}
