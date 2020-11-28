@@ -24,8 +24,8 @@ type searchResult struct {
 }
 
 type randomPageStruct struct {
-	Link  string `json:"link"`
-	Title string `json:"title"`
+	Link string `json:"link"`
+	//Title string `json:"title"`
 }
 
 // Bump this on updates please :)
@@ -212,8 +212,8 @@ func apiRandom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_ = json.NewEncoder(w).Encode(randomPageStruct{
-		Link:  strings.ReplaceAll(files[rand.Intn(len(files))].Name(), ".json", ""),
-		Title: files[rand.Intn(len(files))].Name(),
+		Link: strings.ReplaceAll(files[rand.Intn(len(files))].Name(), ".json", ""),
+		//Title: files[rand.Intn(len(files))].Name(),
 	})
 }
 
