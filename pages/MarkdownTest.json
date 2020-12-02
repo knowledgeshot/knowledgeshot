@@ -1,0 +1,12 @@
+{
+ "Title": "MarkdownTest",
+ "text": "# This is a test for markdown support inside KnowledgeShot\n## It is very experimental!\n- Lists do be\n- working doe!\nAnd [links](pog.com) too, of course.\n\nCode line: `code bro`",
+ "author": [
+  "ptgms Industries",
+  "nil",
+  "nil",
+  "nil"
+ ],
+ "image": [],
+ "links": []
+}

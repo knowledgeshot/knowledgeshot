@@ -77,6 +77,14 @@ func MarkDownReady(text string) template.HTML {
 	return finalTemp
 }
 
+func MarkDownResponse(text string) string {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(text), &buf); err != nil {
+		panic(err)
+	}
+	return buf.String()
+}
+
 // IPRateLimiter .
 type IPRateLimiter struct {
 	ips map[string]*rate.Limiter
