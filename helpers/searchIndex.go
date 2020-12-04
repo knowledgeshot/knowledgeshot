@@ -24,6 +24,9 @@ func IndexSearch() {
 	}
 
 	for fileList := range files {
+		if !strings.HasSuffix(files[fileList].Name(), ".json") {
+			continue
+		}
 		path := strings.ReplaceAll(files[fileList].Name(), ".json", "")
 		response := GetPage(path)
 		searchResults = append(searchResults, searchResult{
