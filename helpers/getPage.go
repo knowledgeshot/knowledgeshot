@@ -7,7 +7,6 @@ import (
 	"golang.org/x/time/rate"
 	"html/template"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"sync"
 )
@@ -45,7 +44,7 @@ func GetPage(term string) pageData {
 		return data
 
 	} else {
-		println("Tried accessing a page that doesn't exist")
+		//println("Tried accessing a page that doesn't exist")
 		return pageData{
 			Title: "404ERROR",
 			Text:  "",
@@ -53,19 +52,6 @@ func GetPage(term string) pageData {
 			Links: nil,
 		}
 	}
-}
-
-func MakePage(title string, text string, author [4]string, image []string, links []string) {
-	page := pageData{
-		Title:  title,
-		Text:   text,
-		Author: author,
-		Image:  image,
-		Links:  links,
-	}
-	file, _ := json.MarshalIndent(page, "", " ")
-
-	_ = ioutil.WriteFile("pages/"+url.QueryEscape(title)+".json", file, 0644)
 }
 
 func MarkDownReady(text string) template.HTML {
@@ -77,13 +63,14 @@ func MarkDownReady(text string) template.HTML {
 	return finalTemp
 }
 
+/* I wanna force people to use Markdown in API calls, so now its default procedure :)
 func MarkDownResponse(text string) string {
 	var buf bytes.Buffer
 	if err := goldmark.Convert([]byte(text), &buf); err != nil {
 		panic(err)
 	}
 	return buf.String()
-}
+}*/
 
 // IPRateLimiter .
 type IPRateLimiter struct {

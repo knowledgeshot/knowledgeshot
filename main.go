@@ -75,10 +75,6 @@ func homePage(w http.ResponseWriter, _ *http.Request) {
 		Version:  version,
 	}
 	_ = t.Execute(w, items)
-
-	//_, _ = fmt.Fprintf(w, "Welcome to the Knowledgeshot Homepage!\n"+
-	//		"")
-	//fmt.Println("Endpoint Hit: " + r.RequestURI)
 }
 
 // Rate limit so servers wont get overwhelmed.
@@ -185,7 +181,7 @@ func allArts(w http.ResponseWriter, _ *http.Request) {
 
 func apiSearch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if !helpers.Validate_key(r.Header.Get("API-Key")) {
+	if !helpers.ValidateKey(r.Header.Get("API-Key")) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -198,7 +194,7 @@ func apiSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiRandom(w http.ResponseWriter, r *http.Request) {
-	if !helpers.Validate_key(r.Header.Get("API-Key")) {
+	if !helpers.ValidateKey(r.Header.Get("API-Key")) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -228,7 +224,7 @@ func apiRandom(w http.ResponseWriter, r *http.Request) {
 
 func apiDisplay(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if !helpers.Validate_key(r.Header.Get("API-Key")) {
+	if !helpers.ValidateKey(r.Header.Get("API-Key")) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

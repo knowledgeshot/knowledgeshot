@@ -1,5 +1,5 @@
 # KnowledgeShot
-
+##### This is where the API and Web side of things live!
 On Version 0.6 - Feel free to contribute!
 
 ### Contribution
