@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/ptgms/knowledgeshot/helpers"
+	"github.com/knowledgeshot/knowledgeshot/helpers"
 	"html/template"
 	"io/ioutil"
 	"math/rand"
@@ -24,12 +24,12 @@ type searchResult struct {
 }
 
 type randomPageStruct struct {
-	Link string `json:"link"`
-	//Title string `json:"title"`
+	Link  string `json:"link"`
+	Title string `json:"title"`
 }
 
 // Bump this on updates please :)
-var version = "0.5"
+var version = "0.6"
 
 // Currently kind of unused, maybe later i will add them somewhere
 var niceStrings = []string{"I hope you're having an nice day!", "We don't track you - it's your right!", "We are grateful for your visit!"}
@@ -203,18 +203,27 @@ func apiRandom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files, err := ioutil.ReadDir("pages/")
-	if err != nil {
-		println("Error while trying to retrieve indexed!")
-		println(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "An internal server error occured! It has been logged!")
-		return
+	allResults := helpers.ReturnAll()
+
+	var articlesParsed []searchResult
+
+	for i := range allResults {
+		articlesParsed = append(articlesParsed, searchResult{
+			SearchResult: allResults[i].Title,
+			LinkContent:  allResults[i].Path,
+			AuthorName:   allResults[i].Author[0],
+			WrittenDate:  allResults[i].Author[2],
+		})
 	}
-	_ = json.NewEncoder(w).Encode(randomPageStruct{
-		Link: strings.ReplaceAll(files[rand.Intn(len(files))].Name(), ".json", ""),
-		//Title: files[rand.Intn(len(files))].Name(),
-	})
+
+	pageLoc := rand.Intn(len(articlesParsed))
+
+	if len(articlesParsed) != 0 {
+		_ = json.NewEncoder(w).Encode(randomPageStruct{
+			Link:  articlesParsed[pageLoc].LinkContent,
+			Title: articlesParsed[pageLoc].SearchResult,
+		})
+	}
 }
 
 func apiDisplay(w http.ResponseWriter, r *http.Request) {

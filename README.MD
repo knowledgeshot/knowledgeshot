@@ -1,6 +1,6 @@
 # KnowledgeShot
 
-On Version 0.1 - Feel free to contribute!
+On Version 0.6 - Feel free to contribute!
 
 ### Contribution
 To add an article, see one of the JSONs in pages/. Change the text and make an Pull Request with the new article. If it get's approved it will be visible soon!
