@@ -28,8 +28,16 @@ type randomPageStruct struct {
 	Title string `json:"title"`
 }
 
+type versionCall struct {
+	Version string `json:"version"`
+	VerInt  int    `json:"versionInt"`
+	MinSup  int    `json:"minimumSupported"`
+}
+
 // Bump this on updates please :)
 var version = "0.6"
+
+var VersionInt = 1
 
 // Currently kind of unused, maybe later i will add them somewhere
 var niceStrings = []string{"I hope you're having an nice day!", "We don't track you - it's your right!", "We are grateful for your visit!"}
@@ -96,6 +104,7 @@ func handleRequests() {
 	router.HandleFunc("/api/search/{term}", apiSearch)
 	router.HandleFunc("/api/page/{term}", apiDisplay)
 	router.HandleFunc("/api/random", apiRandom)
+	router.HandleFunc("/api/version", apiVersion)
 
 	server := http.Server{
 		Addr:    ":8081",
@@ -191,6 +200,21 @@ func apiSearch(w http.ResponseWriter, r *http.Request) {
 	searchresults := helpers.ReturnSearch(key) // let us fetch the results from our helper
 
 	_ = json.NewEncoder(w).Encode(searchresults) // return our struct array as json
+}
+
+func apiVersion(w http.ResponseWriter, r *http.Request) {
+	if !helpers.ValidateKey(r.Header.Get("API-Key")) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	versionResp := versionCall{
+		Version: version,    // version string (front/backend)
+		VerInt:  VersionInt, // current version of the api in int
+		MinSup:  1,          // minimum client version supported
+	}
+
+	_ = json.NewEncoder(w).Encode(versionResp) // return our version struct array as json
 }
 
 func apiRandom(w http.ResponseWriter, r *http.Request) {
