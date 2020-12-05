@@ -208,6 +208,10 @@ func apiVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// in the best kind of scenario, both the client and api VersionInt are the same.
+	// but since that isn't just possible sometimes, im adding a check to see if your client is still compatible
+	// in case this gets updated. please add a check in your app.
+
 	versionResp := versionCall{
 		Version: version,    // version string (front/backend)
 		VerInt:  VersionInt, // current version of the api in int
